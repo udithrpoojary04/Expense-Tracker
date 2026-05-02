@@ -11,11 +11,13 @@
     </h2>
     <form method="get" class="d-flex gap-2 align-items-center" id="filterForm">
         <select name="month" class="form-select form-select-sm filter-select" onchange="this.form.submit()">
+            <option value="all" {% if selected_month == 'all' %}selected{% endif %}>All</option>
             {% for m_val, m_name in months %}
             <option value="{{ m_val }}" {% if m_val == selected_month %}selected{% endif %}>{{ m_name }}</option>
             {% endfor %}
         </select>
         <select name="year" class="form-select form-select-sm filter-select" onchange="this.form.submit()">
+            <option value="all" {% if selected_year == 'all' %}selected{% endif %}>All</option>
             {% for y in years %}
             <option value="{{ y }}" {% if y == selected_year %}selected{% endif %}>{{ y }}</option>
             {% endfor %}

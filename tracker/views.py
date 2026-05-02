@@ -62,20 +62,34 @@ class DashboardView(LoginRequiredMixin, TemplateView):
 
         # ── Month / Year filter ──
         today = date.today()
-        selected_month = self.request.GET.get('month', today.month)
-        selected_year = self.request.GET.get('year', today.year)
-        try:
-            selected_month = int(selected_month)
-            selected_year = int(selected_year)
-        except (ValueError, TypeError):
-            selected_month = today.month
-            selected_year = today.year
+        # Accept 'all' for month/year to show all transactions
+        sel_month_raw = self.request.GET.get('month', str(today.month))
+        sel_year_raw = self.request.GET.get('year', str(today.year))
 
-        transactions = Transaction.objects.filter(
-            user=user,
-            date__month=selected_month,
-            date__year=selected_year,
-        )
+        if str(sel_month_raw).lower() == 'all':
+            selected_month = 'all'
+        else:
+            try:
+                selected_month = int(sel_month_raw)
+            except (ValueError, TypeError):
+                selected_month = today.month
+
+        if str(sel_year_raw).lower() == 'all':
+            selected_year = 'all'
+        else:
+            try:
+                selected_year = int(sel_year_raw)
+            except (ValueError, TypeError):
+                selected_year = today.year
+
+        # Build filters depending on whether month/year are set to 'all'
+        filter_kwargs = {'user': user}
+        if selected_month != 'all':
+            filter_kwargs['date__month'] = selected_month
+        if selected_year != 'all':
+            filter_kwargs['date__year'] = selected_year
+
+        transactions = Transaction.objects.filter(**filter_kwargs)
 
         # ── Aggregate totals ──
         total_income = transactions.filter(type='income').aggregate(
